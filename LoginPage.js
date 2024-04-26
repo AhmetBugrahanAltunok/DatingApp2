@@ -6,9 +6,9 @@ export default function LoginPage({ navigation }) {
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    // Giriş işlemini gerçekleştir
-    // Örneğin, kullanıcı adı ve şifreyi kontrol edip giriş yapabilirsiniz
-    alert('Giriş başarılı!');
+    navigation.navigate('Main');
+  
+   
   };
 
   const handleSignup = () => {

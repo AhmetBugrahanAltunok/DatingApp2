@@ -10,8 +10,7 @@ export default function SignupPage({ navigation }) {
 
   const handleSignup = () => {
      navigation.navigate('Home');
-    // Kayıt işlemini gerçekleştir
-    // Örneğin, kullanıcı adı, e-posta, şifre ve cinsiyet bilgilerini bir veritabanına kaydedebilirsiniz
+   
     alert('Kaydınız başarıyla oluşturuldu!');
   };
 

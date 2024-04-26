@@ -7,7 +7,7 @@ export default function HomePage({ navigation }) {
   };
 
   const handleSignupPress = () => {
-    navigation.navigate('Signup'); // Kayıt sayfasına yönlendirme işlemi
+    navigation.navigate('Signup'); 
   };
 
   return (
