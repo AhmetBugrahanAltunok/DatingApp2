@@ -1,26 +1,22 @@
 import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet, ImageBackground } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 
-export default function LoginPage({ navigation }) {
+export default function SignupPage({ navigation }) {
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  const handleLogin = () => {
-    // Giriş işlemini gerçekleştir
-    // Örneğin, kullanıcı adı ve şifreyi kontrol edip giriş yapabilirsiniz
-    alert('Giriş başarılı!');
-  };
+  const [gender, setGender] = useState('');
 
   const handleSignup = () => {
-    navigation.navigate('Signup');
-  };
-
-  const handleForgotPassword = () => {
-    alert('Şifrenizi sıfırlamak için e-posta adresinize bir bağlantı gönderildi.');
+     navigation.navigate('Home');
+    // Kayıt işlemini gerçekleştir
+    // Örneğin, kullanıcı adı, e-posta, şifre ve cinsiyet bilgilerini bir veritabanına kaydedebilirsiniz
+    alert('Kaydınız başarıyla oluşturuldu!');
   };
 
   return (
-    <ImageBackground source={require('./assets/bckgraund/loginBG.jpg')} style={styles.backgroundImage}>
+    <ImageBackground source={require('./assets/bckgraund/SignupBG.jpg')} style={styles.backgroundImage}>
       <View style={styles.container}>
         
         <TextInput
@@ -30,20 +26,31 @@ export default function LoginPage({ navigation }) {
           style={styles.input}
         />
         <TextInput
+          placeholder="E-posta"
+          value={email}
+          onChangeText={setEmail}
+          style={styles.input}
+        />
+        <TextInput
           placeholder="Şifre"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
           style={styles.input}
         />
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Giriş Yap</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Signup')}>
+        <Picker
+          selectedValue={gender}
+          style={styles.input}
+          onValueChange={(itemValue, itemIndex) =>
+            setGender(itemValue)
+          }>
+          <Picker.Item label="Cinsiyet Seçiniz" value="" />
+          <Picker.Item label="Erkek" value="Erkek" />
+          <Picker.Item label="Kadın" value="Kadın" />
+          <Picker.Item label="Diğer" value="Diğer" />
+        </Picker>
+        <TouchableOpacity style={styles.button} onPress={handleSignup}>
           <Text style={styles.buttonText}>Kaydol</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleForgotPassword}>
-          <Text style={styles.forgotPassword}>Şifremi Unuttum</Text>
         </TouchableOpacity>
       </View>
     </ImageBackground>
@@ -62,7 +69,7 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     justifyContent: 'center',
   },
-  loginText: {
+  signupText: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
@@ -88,9 +95,5 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
     fontSize: 16,
-  },
-  forgotPassword: {
-    color: '#D30455',
-    marginTop: 10,
   },
 });
