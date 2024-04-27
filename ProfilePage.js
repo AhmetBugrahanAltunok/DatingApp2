@@ -34,9 +34,6 @@ export default function ProfilePage({ navigation }) {
         <TouchableOpacity style={styles.button} onPress={() => handleNavigation('Chat')}>
           <Text style={styles.buttonText}>Sohbet</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => handleNavigation('Profile')}>
-          <Text style={styles.buttonText}>Profil</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -86,7 +83,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#D30455',
     paddingVertical: 10,
     position: 'absolute',
     bottom: 0,
@@ -99,5 +96,6 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#fff',
   },
 });

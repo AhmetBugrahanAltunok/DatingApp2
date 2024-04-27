@@ -2,11 +2,9 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import Swiper from 'react-native-swiper';
 
-
 const profiles = [
   { id: 1, username: 'User1', age: 25, bio: 'Lorem ipsum dolor sit amet.', image: require('./assets/users/user1.jpg') },
   { id: 2, username: 'User2', age: 28, bio: 'Consectetur adipiscing elit.', image: require('./assets/users/user2.jpg') },
- 
 ];
 
 export default function MainPage({ navigation }) {
@@ -27,13 +25,13 @@ export default function MainPage({ navigation }) {
       </Swiper>
       <View style={styles.bottomBar}>
         <TouchableOpacity style={styles.button} onPress={() => handleNavigation('Main')}>
-          <Text style={styles.buttonText}>Home</Text>
+          <Text style={styles.buttonText}>Ana Sayfa</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={() => handleNavigation('Chat')}>
-          <Text style={styles.buttonText}>Chat</Text>
+          <Text style={styles.buttonText}>Sohbet</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={() => handleNavigation('Profile')}>
-          <Text style={styles.buttonText}>Profile</Text>
+          <Text style={styles.buttonText}>Profil</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -45,7 +43,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   wrapper: {
-    // Örnek: Kartlar arasındaki boşluk
     marginBottom: 50,
   },
   slide: {
@@ -73,9 +70,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#D30455',
     paddingVertical: 10,
-    width: '100%',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   button: {
     paddingVertical: 10,
@@ -83,5 +83,6 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#fff',
   },
 });

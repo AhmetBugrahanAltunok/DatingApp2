@@ -1,38 +1,47 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, Image } from 'react-native';
 
-export default function ChatPage() {
-  const [message, setMessage] = useState('');
-  const [chat, setChat] = useState([]);
+// Örnek sohbet verileri
+const conversations = [
+  { id: 1, userId: 1, username: 'User1', lastMessage: 'Merhaba' },
+  { id: 2, userId: 2, username: 'User2', lastMessage: 'Hi' },
+  // Diğer sohbetler buraya eklenebilir
+];
 
-  const sendMessage = () => {
-    if (message.trim() !== '') {
- 
-      setChat([...chat, { id: chat.length + 1, message: message }]);
-      
-      setMessage('');
-    }
+export default function ChatPage({ navigation }) {
+  const handleChatSelect = (userId) => {
+    // Seçilen kullanıcı ile sohbet detay sayfasına yönlendirme yap
+    navigation.navigate('ChatDetail', { userId });
   };
+
+  const renderChatItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.chatItem}
+      onPress={() => handleChatSelect(item.userId)}
+    >
+      <Image source={require('./assets/users/user1.jpg')} style={styles.avatar} />
+      <View style={styles.chatInfo}>
+        <Text style={styles.username}>{item.username}</Text>
+        <Text style={styles.lastMessage}>{item.lastMessage}</Text>
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.headerText}>Sohbet</Text>
-      <ScrollView contentContainerStyle={styles.chatContainer}>
-        {chat.map(item => (
-          <View key={item.id} style={[styles.messageContainer, item.id % 2 === 0 ? styles.otherMessage : styles.myMessage]}>
-            <Text style={styles.messageText}>{item.message}</Text>
-          </View>
-        ))}
-      </ScrollView>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={message}
-          onChangeText={setMessage}
-          placeholder="Mesajınızı girin..."
-        />
-        <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-          <Text style={styles.sendButtonText}>Gönder</Text>
+      <FlatList
+        data={conversations}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderChatItem}
+      />
+
+      {/* Bottom bar */}
+      <View style={styles.bottomBar}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Main')}>
+          <Text style={styles.buttonText}>Ana Sayfa</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Profile')}>
+          <Text style={styles.buttonText}>Profil</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -42,65 +51,50 @@ export default function ChatPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 80, // Ekranın üstündeki boşluğu artırır
     backgroundColor: '#fff',
-    paddingTop: 20,
-    paddingHorizontal: 20,
   },
-  headerText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  chatContainer: {
-    flexGrow: 1,
-    paddingBottom: 20,
-  },
-  messageContainer: {
-    maxWidth: '80%',
-    alignSelf: 'flex-start',
-    backgroundColor: '#f0f0f0',
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 10,
-  },
-  myMessage: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#D30455',
-    color: 'white',
-  },
-  otherMessage: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#ccc',
-  },
-  messageText: {
-    fontSize: 16,
-  },
-  inputContainer: {
+  chatItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#ccc',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
-  input: {
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 20,
+  },
+  chatInfo: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    marginRight: 10,
   },
-  sendButton: {
+  username: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  lastMessage: {
+    fontSize: 16,
+    color: '#666',
+  },
+  bottomBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
     backgroundColor: '#D30455',
-    borderRadius: 20,
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
-  sendButtonText: {
-    color: 'white',
+  button: {
+    paddingVertical: 10,
+  },
+  buttonText: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#fff',
   },
 });
