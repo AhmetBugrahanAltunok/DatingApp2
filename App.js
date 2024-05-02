@@ -8,7 +8,12 @@ import  MainPage from './MainPage';
 import  ChatPage from './ChatPage';
 import ProfilePage from './ProfilePage';
 import ChatDetailPage from './ChatDetailPage';
-    
+
+
+
+
+
+
 
 const Stack = createNativeStackNavigator();
 

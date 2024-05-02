@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Modal } from 'react-native';
 
 export default function ProfilePage({ navigation }) {
- 
+  const [isModalVisible, setIsModalVisible] = useState(false); // Modal pencerenin görünürlüğünü kontrol etmek için durum
   const user = {
     username: 'User1',
     age: 25,
@@ -18,7 +18,11 @@ export default function ProfilePage({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.profileContainer}>
-        <Image source={user.image} style={styles.image} />
+        <TouchableOpacity onPress={() => setIsModalVisible(true)}> 
+          <View style={styles.imageContainer}>
+            <Image source={user.image} style={styles.image} />
+          </View>
+        </TouchableOpacity>
         <Text style={styles.username}>{user.username}, {user.age}</Text>
         <Text style={styles.bio}>{user.bio}</Text>
         <View style={styles.hobbiesContainer}>
@@ -35,6 +39,17 @@ export default function ProfilePage({ navigation }) {
           <Text style={styles.buttonText}>Sohbet</Text>
         </TouchableOpacity>
       </View>
+      {/* Modal pencere */}
+      <Modal visible={isModalVisible} transparent={true} onRequestClose={() => setIsModalVisible(false)}>
+        <View style={styles.modalContainer}>
+          <TouchableOpacity style={styles.closeButton} onPress={() => setIsModalVisible(false)}>
+            <Text style={styles.closeButtonText}>X</Text>
+          </TouchableOpacity>
+          <View style={styles.modalImageContainer}>
+            <Image source={user.image} style={styles.modalImage} resizeMode="cover" />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -50,11 +65,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  image: {
+  imageContainer: {
     width: 150,
     height: 150,
     borderRadius: 75,
+    overflow: 'hidden',
     marginBottom: 20,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
   },
   username: {
     fontSize: 24,
@@ -97,5 +117,40 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#fff',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Modal arkaplan rengi
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    backgroundColor: '#D30455',
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  modalImageContainer: {
+    width: 250,
+    height: 250,
+    borderRadius: 125,
+    overflow: 'hidden', // Resmin dışına taşan kısımları kesmek için
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 125, // Resmin tam bir yuvarlak şekilde gösterilmesi için
   },
 });

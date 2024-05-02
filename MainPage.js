@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import Swiper from 'react-native-swiper';
 
@@ -8,8 +8,18 @@ const profiles = [
 ];
 
 export default function MainPage({ navigation }) {
+  const [likedProfiles, setLikedProfiles] = useState([]);
+
   const handleNavigation = (screenName) => {
     navigation.navigate(screenName);
+  };
+
+  const handleLike = (profileId) => {
+    setLikedProfiles([...likedProfiles, profileId]);
+  };
+
+  const handleDislike = (profileId) => {
+    // Handle dislike action if needed
   };
 
   return (
@@ -20,6 +30,14 @@ export default function MainPage({ navigation }) {
             <Image source={profile.image} style={styles.image} />
             <Text style={styles.username}>{profile.username}, {profile.age}</Text>
             <Text style={styles.bio}>{profile.bio}</Text>
+            <View style={styles.buttonsContainer}>
+              <TouchableOpacity style={[styles.button, styles.likeButton]} onPress={() => handleLike(profile.id)}>
+                <Text style={styles.buttonText}>Like</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.button, styles.dislikeButton]} onPress={() => handleDislike(profile.id)}>
+                <Text style={styles.buttonText}>Dislike</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         ))}
       </Swiper>
@@ -66,6 +84,26 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
   },
+  buttonsContainer: {
+    flexDirection: 'row',
+  },
+  button: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginHorizontal: 10,
+  },
+  likeButton: {
+    backgroundColor: '#4CAF50',
+  },
+  dislikeButton: {
+    backgroundColor: '#FF5733',
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
   bottomBar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -76,13 +114,5 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-  },
-  button: {
-    paddingVertical: 10,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
   },
 });

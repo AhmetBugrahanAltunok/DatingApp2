@@ -1,23 +1,43 @@
 import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet, ImageBackground } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import firebase from 'firebase/app'; // Firebase app modülünü içe aktarın
+import 'firebase/auth'; // Firebase authentication modülünü içe aktarın
+import 'firebase/firestore'; // Firebase firestore modülünü içe aktarın
 
 export default function SignupPage({ navigation }) {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [gender, setGender] = useState('');
+  const [age, setAge] = useState('');
 
   const handleSignup = () => {
-     navigation.navigate('Home');
-   
-    alert('Kaydınız başarıyla oluşturuldu!');
+    firebase.auth()
+      .createUserWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        alert('Kaydınız başarıyla oluşturuldu!');
+
+        // Firestore'da kullanıcı verilerini kaydetme
+        firebase.firestore().collection('users').doc(user.uid).set({
+          username,
+          email,
+          age,
+          gender
+        });
+
+        navigation.navigate('Home');
+      })
+      .catch((error) => {
+        const errorMessage = error.message;
+        alert(errorMessage);
+      });
   };
 
   return (
     <ImageBackground source={require('./assets/bckgraund/SignupBG.jpg')} style={styles.backgroundImage}>
       <View style={styles.container}>
-        
         <TextInput
           placeholder="Kullanıcı Adı"
           value={username}
@@ -48,6 +68,13 @@ export default function SignupPage({ navigation }) {
           <Picker.Item label="Kadın" value="Kadın" />
           <Picker.Item label="Diğer" value="Diğer" />
         </Picker>
+        <TextInput
+          placeholder="Yaş"
+          value={age}
+          onChangeText={setAge}
+          keyboardType="numeric"
+          style={styles.input}
+        />
         <TouchableOpacity style={styles.button} onPress={handleSignup}>
           <Text style={styles.buttonText}>Kaydol</Text>
         </TouchableOpacity>
