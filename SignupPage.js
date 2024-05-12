@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet, ImageBackground } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import firebase from 'firebase/app'; // Firebase app modülünü içe aktarın
-import 'firebase/auth'; // Firebase authentication modülünü içe aktarın
-import 'firebase/firestore'; // Firebase firestore modülünü içe aktarın
+import firebase from '../firebaseDB/firebaseConfig'; // Firebase yapılandırma dosyasını içe aktarın
+import 'firebase/auth'; 
+import 'firebase/firestore'; 
 
 export default function SignupPage({ navigation }) {
   const [username, setUsername] = useState('');
@@ -11,6 +11,7 @@ export default function SignupPage({ navigation }) {
   const [password, setPassword] = useState('');
   const [gender, setGender] = useState('');
   const [age, setAge] = useState('');
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const handleSignup = () => {
     firebase.auth()
@@ -31,13 +32,17 @@ export default function SignupPage({ navigation }) {
       })
       .catch((error) => {
         const errorMessage = error.message;
-        alert(errorMessage);
+        setErrorMessage(errorMessage); // Hata mesajını ayarlayın
+        console.error('Signup Error:', errorMessage); // Konsola hata mesajını yazdırın
       });
   };
 
   return (
     <ImageBackground source={require('./assets/bckgraund/SignupBG.jpg')} style={styles.backgroundImage}>
       <View style={styles.container}>
+        {errorMessage && (
+          <Text style={styles.errorText}>{errorMessage}</Text> // Hata mesajını görüntüleyin
+        )}
         <TextInput
           placeholder="Kullanıcı Adı"
           value={username}
@@ -95,12 +100,6 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     justifyContent: 'center',
   },
-  signupText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: 'white',
-  },
   input: {
     width: '100%',
     marginVertical: 10,
@@ -121,5 +120,10 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
     fontSize: 16,
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 10,
   },
 });
