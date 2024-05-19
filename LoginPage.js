@@ -7,12 +7,6 @@ export default function LoginPage({ navigation }) {
 
   const handleLogin = () => {
     navigation.navigate('Main');
-  
-   
-  };
-
-  const handleSignup = () => {
-    navigation.navigate('Signup');
   };
 
   const handleForgotPassword = () => {
@@ -22,27 +16,23 @@ export default function LoginPage({ navigation }) {
   return (
     <ImageBackground source={require('./assets/bckgraund/loginBG.jpg')} style={styles.backgroundImage}>
       <View style={styles.container}>
-        
         <TextInput
           placeholder="Kullanıcı Adı"
           value={username}
           onChangeText={setUsername}
-          style={styles.input}
+          style={[styles.input, styles.usernameInput]}
         />
         <TextInput
           placeholder="Şifre"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
-          style={styles.input}
+          style={[styles.input, styles.passwordInput]}
         />
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
           <Text style={styles.buttonText}>Giriş Yap</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Signup')}>
-          <Text style={styles.buttonText}>Kaydol</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleForgotPassword}>
+        <TouchableOpacity onPress={handleForgotPassword} style={styles.forgotPasswordContainer}>
           <Text style={styles.forgotPassword}>Şifremi Unuttum</Text>
         </TouchableOpacity>
       </View>
@@ -74,23 +64,31 @@ const styles = StyleSheet.create({
     padding: 10,
     borderWidth: 1,
     borderColor: '#cccccc',
-    borderRadius: 5,
+    borderRadius: 20,
     backgroundColor: 'white',
   },
+  passwordInput: {
+    marginTop: 10,
+  },
   button: {
-    width: '100%',
-    backgroundColor: '#D30455',
+    width: '80%',
+    backgroundColor: 'transparent',
     paddingVertical: 15,
     borderRadius: 20,
-    marginTop: 10,
+    marginTop: 5,
   },
   buttonText: {
     color: 'white',
     textAlign: 'center',
     fontSize: 16,
   },
+  forgotPasswordContainer: {
+    marginTop: 20,
+  },
   forgotPassword: {
     color: '#D30455',
-    marginTop: 10,
+  },
+  usernameInput: {
+    marginTop: 180,
   },
 });

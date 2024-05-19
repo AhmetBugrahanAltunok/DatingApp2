@@ -1,129 +1,162 @@
-import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Text, StyleSheet, ImageBackground } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import firebase from '../firebaseDB/firebaseConfig'; // Firebase yapılandırma dosyasını içe aktarın
-import 'firebase/auth'; 
-import 'firebase/firestore'; 
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, ScrollView } from 'react-native';
+import { initializeApp } from '@firebase/app';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from '@firebase/auth';
 
-export default function SignupPage({ navigation }) {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [gender, setGender] = useState('');
-  const [age, setAge] = useState('');
-  const [errorMessage, setErrorMessage] = useState(null);
+const firebaseConfig = {
+  apiKey: "AIzaSyCfE2QYJKPNvaaXDIxUlGQSLHSJez-V-No",
+  authDomain: "dateapp-d0658.firebaseapp.com",
+  projectId: "dateapp-d0658",
+  storageBucket: "dateapp-d0658.appspot.com",
+  messagingSenderId: "369307984656",
+  appId: "1:369307984656:web:b76dae469dcb239b7bfb95"
+};
 
-  const handleSignup = () => {
-    firebase.auth()
-      .createUserWithEmailAndPassword(email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        alert('Kaydınız başarıyla oluşturuldu!');
+const app = initializeApp(firebaseConfig);
 
-        // Firestore'da kullanıcı verilerini kaydetme
-        firebase.firestore().collection('users').doc(user.uid).set({
-          username,
-          email,
-          age,
-          gender
-        });
-
-        navigation.navigate('Home');
-      })
-      .catch((error) => {
-        const errorMessage = error.message;
-        setErrorMessage(errorMessage); // Hata mesajını ayarlayın
-        console.error('Signup Error:', errorMessage); // Konsola hata mesajını yazdırın
-      });
-  };
-
+const AuthScreen = ({ email, setEmail, password, setPassword, isLogin, setIsLogin, handleAuthentication }) => {
   return (
-    <ImageBackground source={require('./assets/bckgraund/SignupBG.jpg')} style={styles.backgroundImage}>
-      <View style={styles.container}>
-        {errorMessage && (
-          <Text style={styles.errorText}>{errorMessage}</Text> // Hata mesajını görüntüleyin
-        )}
-        <TextInput
-          placeholder="Kullanıcı Adı"
-          value={username}
-          onChangeText={setUsername}
-          style={styles.input}
-        />
-        <TextInput
-          placeholder="E-posta"
-          value={email}
-          onChangeText={setEmail}
-          style={styles.input}
-        />
-        <TextInput
-          placeholder="Şifre"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          style={styles.input}
-        />
-        <Picker
-          selectedValue={gender}
-          style={styles.input}
-          onValueChange={(itemValue, itemIndex) =>
-            setGender(itemValue)
-          }>
-          <Picker.Item label="Cinsiyet Seçiniz" value="" />
-          <Picker.Item label="Erkek" value="Erkek" />
-          <Picker.Item label="Kadın" value="Kadın" />
-          <Picker.Item label="Diğer" value="Diğer" />
-        </Picker>
-        <TextInput
-          placeholder="Yaş"
-          value={age}
-          onChangeText={setAge}
-          keyboardType="numeric"
-          style={styles.input}
-        />
-        <TouchableOpacity style={styles.button} onPress={handleSignup}>
-          <Text style={styles.buttonText}>Kaydol</Text>
-        </TouchableOpacity>
+    <View style={styles.authContainer}>
+       <Text style={styles.title}>{isLogin ? 'Sign In' : 'Sign Up'}</Text>
+
+       <TextInput
+        style={styles.input}
+        value={email}
+        onChangeText={setEmail}
+        placeholder="Email"
+        autoCapitalize="none"
+      />
+      <TextInput
+        style={styles.input}
+        value={password}
+        onChangeText={setPassword}
+        placeholder="Password"
+        secureTextEntry
+      />
+      <View style={styles.buttonContainer}>
+        <Button title={isLogin ? 'Sign In' : 'Sign Up'} onPress={handleAuthentication} color="#3498db" />
       </View>
-    </ImageBackground>
+
+      <View style={styles.bottomContainer}>
+        <Text style={styles.toggleText} onPress={() => setIsLogin(!isLogin)}>
+          {isLogin ? 'Need an account? Sign Up' : 'Already have an account? Sign In'}
+        </Text>
+      </View>
+    </View>
   );
 }
 
+
+const AuthenticatedScreen = ({ user, handleAuthentication }) => {
+  return (
+    <View style={styles.authContainer}>
+      <Text style={styles.title}>Welcome</Text>
+      <Text style={styles.emailText}>{user.email}</Text>
+      <Button title="Logout" onPress={handleAuthentication} color="#e74c3c" />
+    </View>
+  );
+};
+export default App = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [user, setUser] = useState(null); // Track user authentication state
+  const [isLogin, setIsLogin] = useState(true);
+
+  const auth = getAuth(app);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
+
+    return () => unsubscribe();
+  }, [auth]);
+
+  
+  const handleAuthentication = async () => {
+    try {
+      if (user) {
+        // If user is already authenticated, log out
+        console.log('User logged out successfully!');
+        await signOut(auth);
+      } else {
+        // Sign in or sign up
+        if (isLogin) {
+          // Sign in
+          await signInWithEmailAndPassword(auth, email, password);
+          console.log('User signed in successfully!');
+        } else {
+          // Sign up
+          await createUserWithEmailAndPassword(auth, email, password);
+          console.log('User created successfully!');
+        }
+      }
+    } catch (error) {
+      console.error('Authentication error:', error.message);
+    }
+  };
+
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      {user ? (
+        // Show user's email if user is authenticated
+        <AuthenticatedScreen user={user} handleAuthentication={handleAuthentication} />
+      ) : (
+        // Show sign-in or sign-up form if user is not authenticated
+        <AuthScreen
+          email={email}
+          setEmail={setEmail}
+          password={password}
+          setPassword={setPassword}
+          isLogin={isLogin}
+          setIsLogin={setIsLogin}
+          handleAuthentication={handleAuthentication}
+        />
+      )}
+    </ScrollView>
+  );
+}
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
+    padding: 16,
+    backgroundColor: '#f0f0f0',
   },
-  backgroundImage: {
-    flex: 1,
-    resizeMode: 'cover',
-    justifyContent: 'center',
+  authContainer: {
+    width: '80%',
+    maxWidth: 400,
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 8,
+    elevation: 3,
+  },
+  title: {
+    fontSize: 24,
+    marginBottom: 16,
+    textAlign: 'center',
   },
   input: {
-    width: '100%',
-    marginVertical: 10,
-    padding: 10,
+    height: 40,
+    borderColor: '#ddd',
     borderWidth: 1,
-    borderColor: '#cccccc',
-    borderRadius: 5,
-    backgroundColor: 'white',
+    marginBottom: 16,
+    padding: 8,
+    borderRadius: 4,
   },
-  button: {
-    width: '100%',
-    backgroundColor: '#D30455',
-    paddingVertical: 15,
-    borderRadius: 20,
-    marginTop: 10,
+  buttonContainer: {
+    marginBottom: 16,
   },
-  buttonText: {
-    color: 'white',
+  toggleText: {
+    color: '#3498db',
     textAlign: 'center',
-    fontSize: 16,
   },
-  errorText: {
-    color: 'red',
+  bottomContainer: {
+    marginTop: 20,
+  },
+  emailText: {
+    fontSize: 18,
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: 20,
   },
 });

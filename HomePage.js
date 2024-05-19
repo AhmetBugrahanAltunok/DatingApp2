@@ -11,54 +11,59 @@ export default function HomePage({ navigation }) {
   };
 
   return (
-    <ImageBackground source={require('./assets/bckgraund/background.jpg')} style={styles.backgroundImage}>
-      <View style={styles.container}>
-     
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, { backgroundColor: '#D30455' }]}
-            onPress={handleLoginPress}
-          >
-            <Text style={styles.buttonText}>Giriş Yap</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, { backgroundColor: '#D30455' }]}
-            onPress={handleSignupPress}
-          >
-            <Text style={styles.buttonText}>Kayıt Ol</Text>
-          </TouchableOpacity>
+    <View style={styles.container}>
+      <ImageBackground source={require('./assets/bckgraund/background.jpg')} style={styles.backgroundImage}>
+        <View style={styles.overlay}>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.button, styles.loginButton]}
+              onPress={handleLoginPress}
+            >
+              <Text style={styles.buttonText}>Giriş Yap</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, styles.signupButton]}
+              onPress={handleSignupPress}
+            >
+              <Text style={styles.buttonText}>Kayıt Ol</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </ImageBackground>
+      </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   backgroundImage: {
     flex: 1,
     resizeMode: 'cover',
     justifyContent: 'center',
   },
-  appTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    color: 'white',
+  overlay: {
+    flex: 1,
   },
   buttonContainer: {
-    width: '80%',
-    marginBottom: 20,
+    position: 'absolute',
+    bottom: 50,
+    width: '100%',
+    alignItems: 'center',
   },
   button: {
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderRadius: 20,
-    marginBottom: 10,
+    width: '80%',
+    backgroundColor: 'rgba(211, 4, 85, 0.0)', // Şeffaf kırmızı (opaklık: 0.7)
+  },
+  loginButton: {
+    marginBottom: 20, // "Giriş Yap" butonunu biraz yukarı al
+  },
+  signupButton: {
+    marginBottom: 3, // "Kayıt Ol" butonunu biraz daha aşağı indir
   },
   buttonText: {
     color: 'white',
