@@ -1,5 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react'; // Tek bir import
 import { View, Text, TouchableOpacity, FlatList, StyleSheet, Image } from 'react-native';
+import { getFirestore, collection, onSnapshot, query, where, orderBy } from 'firebase/firestore';
+
+const db = getFirestore();
 
 // Örnek sohbet verileri
 const conversations = [
@@ -9,10 +12,26 @@ const conversations = [
 ];
 
 export default function ChatPage({ navigation }) {
-  const handleChatSelect = (userId) => {
-    // Seçilen kullanıcı ile sohbet detay sayfasına yönlendirme yap
-    navigation.navigate('ChatDetail', { userId });
-  };
+  const [conversations, setConversations] = useState([]);
+  const currentUserId = 'your_current_user_id'; // Firebase'den oturum açan kullanıcının ID'si
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      query(
+        collection(db, 'conversations'),
+        where('members', 'array-contains', currentUserId),
+        orderBy('lastMessageTime', 'desc')
+      ),
+      (querySnapshot) => {
+        const updatedConversations = [];
+        querySnapshot.forEach((doc) => {
+          updatedConversations.push({ id: doc.id, ...doc.data() });
+        });
+        setConversations(updatedConversations);
+      }
+    );
+    return unsubscribe;
+  }, []);
 
   const renderChatItem = ({ item }) => (
     <TouchableOpacity
@@ -29,11 +48,11 @@ export default function ChatPage({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={conversations}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderChatItem}
-      />
+    <FlatList
+      data={conversations}
+      keyExtractor={(item) => item.id.toString()}
+      renderItem={renderChatItem}
+    />
 
       {/* Bottom bar */}
       <View style={styles.bottomBar}>

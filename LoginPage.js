@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Text, StyleSheet, ImageBackground, Alert } from 'react-native';
-import { getAuth, signInWithEmailAndPassword } from '@firebase/auth';
+import { ActivityIndicator } from 'react-native';
+import { View, TextInput, TouchableOpacity, Text, StyleSheet, ImageBackground, Alert, Modal } from 'react-native';
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from '@firebase/auth';
 import { initializeApp } from '@firebase/app';
 
 const firebaseConfig = {
@@ -16,26 +17,28 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 export default function LoginPage({ navigation }) {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const handleLogin = async () => {
     try {
       setLoading(true);
-      const userCredential = await signInWithEmailAndPassword(auth, username, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       console.log('Giriş başarılı:', user.uid);
       Alert.alert('Başarılı', 'Giriş işlemi başarıyla tamamlandı.');
       navigation.navigate('Main');
     } catch (error) {
-      let errorMessage = 'Giriş sırasında bir hata oluştu.';
+      let errorMessage = 'Giriş sırasında bir hata oluştu. Lütfen bilgilerinizi kontrol edin.';
       if (error.code === 'auth/wrong-password') {
-        errorMessage = 'Yanlış şifre.';
+        errorMessage = 'Yanlış şifre girdiniz.';
       } else if (error.code === 'auth/user-not-found') {
-        errorMessage = 'Kullanıcı bulunamadı.';
+        errorMessage = 'Bu e-posta adresine kayıtlı kullanıcı bulunamadı.';
       } else if (error.code === 'auth/invalid-email') {
-        errorMessage = 'Geçersiz e-posta adresi.';
+        errorMessage = 'Geçersiz bir e-posta adresi girdiniz.';
       }
       Alert.alert('Giriş Hatası', errorMessage);
     } finally {
@@ -44,7 +47,22 @@ export default function LoginPage({ navigation }) {
   };
 
   const handleForgotPassword = () => {
-    Alert.alert('Şifrenizi sıfırlamak için e-posta adresinize bir bağlantı gönderildi.');
+    setIsModalVisible(true);
+  };
+
+  const handleSendResetEmail = async () => {
+    try {
+      if (resetEmail) {
+        await sendPasswordResetEmail(auth, resetEmail);
+        Alert.alert('Başarılı', 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.');
+        setResetEmail('');
+        setIsModalVisible(false); 
+      } else {
+        Alert.alert('Hata', 'Lütfen e-posta adresinizi girin.');
+      }
+    } catch (error) {
+      Alert.alert('Hata', 'Şifre sıfırlama işlemi başarısız oldu. Lütfen tekrar deneyin veya geçerli bir e-posta adresi girdiğinizden emin olun.');
+    }
   };
 
   return (
@@ -52,8 +70,8 @@ export default function LoginPage({ navigation }) {
       <View style={styles.container}>
         <TextInput
           placeholder="E-posta"
-          value={username}
-          onChangeText={setUsername}
+          value={email}
+          onChangeText={setEmail}
           style={[styles.input, styles.usernameInput]}
         />
         <TextInput
@@ -66,9 +84,36 @@ export default function LoginPage({ navigation }) {
         <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
           {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Giriş Yap</Text>}
         </TouchableOpacity>
+
         <TouchableOpacity onPress={handleForgotPassword} style={styles.forgotPasswordContainer}>
           <Text style={styles.forgotPassword}>Şifremi Unuttum</Text>
         </TouchableOpacity>
+
+        {/* Şifre Sıfırlama Modalı */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isModalVisible}
+          onRequestClose={() => setIsModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Şifremi Sıfırla</Text>
+              <TextInput
+                placeholder="E-posta adresinizi girin"
+                value={resetEmail}
+                onChangeText={setResetEmail}
+                style={styles.input}
+              />
+              <TouchableOpacity style={styles.sendButton} onPress={handleSendResetEmail}>
+                <Text style={styles.sendButtonText}>Gönder</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.cancelButton} onPress={() => setIsModalVisible(false)}>
+                <Text style={styles.cancelButtonText}>İptal</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </View>
     </ImageBackground>
   );
