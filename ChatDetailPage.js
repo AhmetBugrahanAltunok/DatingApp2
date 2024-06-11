@@ -1,73 +1,59 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 
-const auth = getAuth();
-const db = getFirestore();
+const firebaseConfig = {
+  apiKey: "AIzaSyCfE2QYJKPNvaaXDIxUlGQSLHSJez-V-No",
+  authDomain: "dateapp-d0658.firebaseapp.com",
+  projectId: "dateapp-d0658",
+  storageBucket: "dateapp-d0658.appspot.com",
+  messagingSenderId: "369307984656",
+  appId: "1:369307984656:web:b76dae469dcb239b7bfb95"
+};
 
-export default function ChatDetailPage({ route }) {
-  const [message, setMessage] = useState('');
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const ChatDetailPage = ({ route }) => {
+  const { conversationId } = route.params;
+  const currentUser = auth.currentUser;
   const [messages, setMessages] = useState([]);
-  const scrollViewRef = useRef();
-
-  // Diğer kullanıcının ID'si
-  const otherUserId = route.params.userId;
-
-  // Conversation ID oluşturma (örneğin, kullanıcı ID'lerini sıralı bir şekilde birleştirerek)
-  const conversationId = [auth.currentUser.uid, otherUserId].sort().join('_');
+  const [newMessage, setNewMessage] = useState('');
 
   useEffect(() => {
-    // Mesajları dinleme ve güncelleme
-    const unsubscribe = onSnapshot(
-      query(collection(db, 'messages', conversationId, 'messages'), orderBy('timestamp', 'asc')),
-      (querySnapshot) => {
-        const newMessages = [];
-        querySnapshot.forEach((doc) => {
-          newMessages.push({ id: doc.id, ...doc.data() });
-        });
-        setMessages(newMessages);
-      }
+    const q = query(
+      collection(db, `conversations/${conversationId}/messages`),
+      orderBy('createdAt', 'asc')
     );
-    return unsubscribe; // Component unmount olduğunda dinlemeyi durdur
-  }, []);
 
-  const handleSend = async () => {
-    if (message.trim() !== '') {
-      try {
-        // Mesajı Firestore'a kaydet
-        await addDoc(collection(db, 'messages', conversationId, 'messages'), {
-          senderId: auth.currentUser.uid,
-          text: message,
-          timestamp: new Date(),
-        });
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const messages = querySnapshot.docs.map(doc => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      setMessages(messages);
+    });
 
-        // Sohbet listesini güncelle (lastMessage ve lastMessageTime)
-        await db.collection('conversations').doc(conversationId).set({
-          members: [auth.currentUser.uid, otherUserId],
-          lastMessage: message,
-          lastMessageTime: new Date(),
-        }, { merge: true }); // Sadece belirtilen alanları güncelle
+    return unsubscribe;
+  }, [conversationId]);
 
-        setMessage('');
-      } catch (error) {
-        console.error("Mesaj gönderme hatası:", error);
-        // Hata durumunda kullanıcıya uygun bir mesaj gösterilebilir
-      }
+  const sendMessage = async () => {
+    if (newMessage.trim()) {
+      await addDoc(collection(db, `conversations/${conversationId}/messages`), {
+        text: newMessage,
+        createdAt: new Date(),
+        senderId: currentUser.uid,
+      });
+      setNewMessage('');
     }
   };
 
-  const renderMessage = ({ item }) => (
-    <View
-      key={item.id}
-      style={[
-        styles.message,
-        item.senderId === auth.currentUser.uid ? styles.myMessage : styles.theirMessage,
-      ]}
-    >
-      <Text style={[styles.messageText, item.senderId === auth.currentUser.uid && { color: '#fff' }]}>
-        {item.text}
-      </Text>
+  const renderItem = ({ item }) => (
+    <View style={styles.messageContainer}>
+      <Text style={styles.message}>{item.text}</Text>
     </View>
   );
 
@@ -75,79 +61,61 @@ export default function ChatDetailPage({ route }) {
     <View style={styles.container}>
       <FlatList
         data={messages}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderMessage}
-        ref={scrollViewRef}
-        onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}
-        contentContainerStyle={styles.messageContainer}
+        renderItem={renderItem}
+        keyExtractor={item => item.id}
       />
       <View style={styles.inputContainer}>
         <TextInput
-          value={message}
-          onChangeText={setMessage}
-          placeholder="Mesajınızı yazın..."
+          value={newMessage}
+          onChangeText={setNewMessage}
           style={styles.input}
         />
-        <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+        <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
           <Text style={styles.sendButtonText}>Gönder</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
     padding: 10,
   },
   messageContainer: {
-    flexGrow: 1,
-    paddingVertical: 80,
+    padding: 10,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 5,
+    marginVertical: 5,
   },
   message: {
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 10,
-    maxWidth: '80%', // Mesaj balonu genişliği !!
-    alignSelf: 'flex-start', // Kullanıcıya göre hizalama !!
-  },
-  myMessage: {
-    alignSelf: 'flex-end', // Kendi mesajlarımızın sağa hizalama !!
-    backgroundColor: '#D30455', // Kendi mesajlarımızın arkaplan rengi !!!
-  },
-  theirMessage: {
-    backgroundColor: '#fff', // Karşı tarafın mesajlarının arkaplan rengi  !!
-  },
-  messageText: {
     fontSize: 16,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    padding: 10,
+    borderTopWidth: 1,
+    borderColor: '#ccc',
   },
   input: {
     flex: 1,
-    height: 40,
+    padding: 10,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 20,
-    paddingHorizontal: 10,
+    borderRadius: 5,
   },
   sendButton: {
     marginLeft: 10,
     backgroundColor: '#D30455',
-    borderRadius: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    padding: 10,
+    borderRadius: 5,
   },
   sendButtonText: {
     color: '#fff',
     fontWeight: 'bold',
   },
 });
+
+export default ChatDetailPage;

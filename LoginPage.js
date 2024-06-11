@@ -30,7 +30,7 @@ export default function LoginPage({ navigation }) {
       const user = userCredential.user;
       console.log('Giriş başarılı:', user.uid);
       Alert.alert('Başarılı', 'Giriş işlemi başarıyla tamamlandı.');
-      navigation.navigate('Main');
+      navigation.navigate('Main'); // Kullanıcıyı ana sayfaya yönlendir
     } catch (error) {
       let errorMessage = 'Giriş sırasında bir hata oluştu. Lütfen bilgilerinizi kontrol edin.';
       if (error.code === 'auth/wrong-password') {
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   },
   button: {
     width: '80%',
-    backgroundColor: 'transparent',
+    backgroundColor: '#D30455',
     paddingVertical: 15,
     borderRadius: 20,
     marginTop: 5,
@@ -169,5 +169,40 @@ const styles = StyleSheet.create({
   },
   usernameInput: {
     marginTop: 180,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  sendButton: {
+    backgroundColor: '#D30455',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  sendButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  cancelButton: {
+    marginTop: 10,
+  },
+  cancelButtonText: {
+    color: '#D30455',
   },
 });
